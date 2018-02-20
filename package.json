@@ -1,0 +1,36 @@
+{
+  "name": "webautomator",
+  "version": "0.0.0",
+  "description": "Web automation using rendered web context",
+  "license": "Apache-2.0",
+  "keywords": [
+    "automation",
+    "selenium",
+    "testing",
+    "webdriver",
+    "webdriverjs",
+    "webautomator",
+    "webautomatorjs",
+    "webcontext",
+    "webcontextjs"
+  ],
+  "homepage": "https://github.com/mfulton26/webautomator",
+  "bugs": {
+    "url": "https://github.com/mfulton26/webautomator/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfulton26/webautomator.git"
+  },
+  "engines": {
+    "node": ">=8.9.0"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^3.6.0"
+  },
+  "devDependencies": {
+    "chromedriver": "^2.35.0",
+    "jest": "^22.3.0",
+    "jest-environment-node": "latest"
+  }
+}

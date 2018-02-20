@@ -1,0 +1,74 @@
+<html>
+<head>
+    <title>Demo Form</title>
+    <style>
+        label {
+            display: block;
+        }
+
+        .field, fieldset {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+<form id="demo" method="post">
+    <fieldset>
+        <legend>Parent Information</legend>
+        <div class="field">
+            <label for="parent.fname">First Name: </label>
+            <input id="parent.fname" required>
+        </div>
+        <div class="field">
+            <label for="parent.lname">Last Name: </label>
+            <input id="parent.lname" required>
+        </div>
+        <div class="field">
+            <label for="parent.gender">Gender: </label>
+            <select id="parent.gender" required>
+                <option disabled hidden selected/>
+                <option>Male</option>
+                <option>Female</option>
+            </select>
+        </div>
+        <div class="field" hidden>
+            <label for="ssn">Social Security Number: </label>
+            <input id="ssn">
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Child Information</legend>
+        <div class="field">
+            <label for="fname">First Name: </label>
+            <input id="fname" required>
+        </div>
+        <div class="field">
+            <label for="lname">Last Name: </label>
+            <input id="lname" required>
+        </div>
+        <div class="field">
+            <label for="gender">Gender: </label>
+            <select id="gender" required>
+                <option disabled hidden selected/>
+                <option>Male</option>
+                <option>Female</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="dob">Date of Birth: </label>
+            <input id="dob" type="date" required>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Shipping Information</legend>
+        <label><input type="radio" name="shippingMethod" required value="ground">Ground</label>
+        <label><input type="radio" name="shippingMethod" required value="2-day">2-Day</label>
+        <label><input type="radio" name="shippingMethod" required value="1-day">1-Day</label>
+    </fieldset>
+    <fieldset>
+        <legend>Confirmation</legend>
+        <label><input type="checkbox" name="confirmed" required> I confirm that these details are accurate.</label>
+    </fieldset>
+</form>
+</body>
+</html>

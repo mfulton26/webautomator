@@ -1,21 +1,5 @@
-# Web Automator
-Web automation using rendered web context
-
-## Installation
-
-Web Automator may be installed via npm with
-
-    npm install webautomator
-
-You will need to also install and set-up [selenium-webdriver](https://www.npmjs.com/package/selenium-webdriver).
-
-## Usage
-
-The demo below is included in the `example` directory. You may also find the tests to be helpful.
-
-```node
 const {Builder} = require('selenium-webdriver');
-const {WebAutomator} = require('webautomator');
+const {WebAutomator} = require('../index');
 
 (async function demo() {
   const driver = new Builder().forBrowser('chrome').build();
@@ -37,4 +21,3 @@ const {WebAutomator} = require('webautomator');
     await driver.quit();
   }
 })();
-```
