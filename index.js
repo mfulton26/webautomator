@@ -411,7 +411,7 @@ class Setter {
                   while (true) {
                     const label = content[index + 1];
                     if (label && label.text === value) {
-                      await settable.element.click();
+                      await label.parentElement.click();
                       break;
                     } else {
                       settable = content[index += 2];
