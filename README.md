@@ -13,7 +13,7 @@ You will need to also install and set-up [selenium-webdriver](https://www.npmjs.
 
 The demo below is included in the `example` directory. You may also find the tests to be helpful.
 
-```node
+```js
 const {Builder} = require('selenium-webdriver');
 const {WebAutomator} = require('webautomator');
 
