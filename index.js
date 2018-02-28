@@ -120,7 +120,7 @@ class WebContext {
                   break;
                 case Node.TEXT_NODE:
                   var data = reduceWhitespace(node.textContent);
-                  data = textTransform(data, node.parentElement);
+                  data = textTransform(data, node.parentNode);
                   var lastBlockItem = block[block.length - 1];
                   if (lastBlockItem && lastBlockItem.type === "string") {
                     lastBlockItem.text += data;
