@@ -123,20 +123,27 @@ class WebContext {
                   data = textTransform(data, node.parentNode);
                   var lastBlockItem = block[block.length - 1];
                   if (lastBlockItem && lastBlockItem.type === "string") {
-                    lastBlockItem.text += data;
                     if (data.trim()) {
                       lastBlockItem.substrings.push({
                         parentElement: node.parentNode,
-                        text: data
+                        text: data.trim()
                       });
+                      lastBlockItem.text = reduceWhitespace(lastBlockItem.substrings.map(s => s.text).join(" "));
                     }
                   } else {
-                    block.push({
+                    var blockItem = {
                       type: "string",
                       parentElement: node.parentNode,
                       text: data,
                       substrings: []
-                    });
+                    };
+                    if (data.trim()) {
+                      blockItem.substrings.push({
+                        parentElement: node.parentNode,
+                        text: data.trim()
+                      });
+                    }
+                    block.push(blockItem);
                   }
                   break;
               }
