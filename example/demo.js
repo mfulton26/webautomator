@@ -1,5 +1,6 @@
 const {Builder} = require('selenium-webdriver');
 const {WebAutomator} = require('../index');
+require('chromedriver');
 
 (async function demo() {
   const driver = new Builder().forBrowser('chrome').build();

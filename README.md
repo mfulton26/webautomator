@@ -16,6 +16,7 @@ The demo below is included in the `example` directory. You may also find the tes
 ```js
 const {Builder} = require('selenium-webdriver');
 const {WebAutomator} = require('webautomator');
+require('chromedriver');
 
 (async function demo() {
   const driver = new Builder().forBrowser('chrome').build();
@@ -37,4 +38,8 @@ const {WebAutomator} = require('webautomator');
     await driver.quit();
   }
 })();
+```
+
+```bash
+node example/demo.js
 ```
