@@ -402,7 +402,8 @@ class Setter {
           let settable = content[index];
           switch (settable.tagName) {
             case "SELECT":
-              let option = settable.options.find(option => option.text === value);
+              const matcher = value instanceof RegExp ? String.prototype.match : String.prototype.includes;
+              let option = settable.options.find(option => matcher.call(option.text, value));
               if (!option) {
                 throw `No option with text found: ${value}`;
               }
