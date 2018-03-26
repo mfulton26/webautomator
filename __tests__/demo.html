@@ -26,7 +26,7 @@
         <div class="field">
             <label for="parent.gender">Gender: </label>
             <select id="parent.gender" required>
-                <option disabled hidden selected/>
+                <option disabled hidden selected></option>
                 <option>Male</option>
                 <option>Female</option>
             </select>
@@ -49,7 +49,7 @@
         <div class="field">
             <label for="gender">Gender: </label>
             <select id="gender" required>
-                <option disabled hidden selected/>
+                <option disabled hidden selected></option>
                 <option>Male</option>
                 <option>Female</option>
             </select>
@@ -64,6 +64,12 @@
         <label><input type="radio" name="shippingMethod" required value="ground">Ground</label>
         <label><input type="radio" name="shippingMethod" required value="2-day">2-Day</label>
         <label><input type="radio" name="shippingMethod" required value="1-day">1-Day</label>
+        <fieldset>
+            <legend>Shipping Options</legend>
+            <label><input type="checkbox" id="giftWrap">Gift wrapped?</label>
+            <label><input type="checkbox" id="warranty">Warranty?</label>
+            <label><input type="checkbox" id="returnable" checked>Returnable?</label>
+        </fieldset>
     </fieldset>
     <fieldset>
         <legend>Confirmation</legend>

@@ -43,3 +43,13 @@ require('chromedriver');
 ```bash
 node example/demo.js
 ```
+
+## Documentation
+
+### `click`
+
+### `set`
+
+### `after`
+
+### `match`
