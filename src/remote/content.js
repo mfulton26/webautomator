@@ -115,7 +115,9 @@ function getContent() {
                     parentElement: node.parentNode,
                     text: data.trim()
                   });
-                  lastBlockItem.text = reduceWhitespace(lastBlockItem.substrings.map(s => s.text).join(" "));
+                  lastBlockItem.text = reduceWhitespace(lastBlockItem.substrings.map(function (s) {
+                    return s.text;
+                  }).join(" "));
                 }
               } else {
                 var blockItem = {
