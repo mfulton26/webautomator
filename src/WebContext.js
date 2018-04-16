@@ -15,6 +15,8 @@ class WebContext {
     this.webDriver = webDriver;
     this.timeout = timeout;
     this.precedings = precedings;
+
+    this.can = new WebCan(this);
   }
 
   async _getContent() {
@@ -152,6 +154,40 @@ class WebContext {
     const {content, index} = await this._getContentWithIndexOfContext([...this.precedings, regExp], timeout);
     const item = content[index];
     return item.text.match(regExp);
+  }
+}
+
+class WebCan {
+  constructor(webContext, affirmative = true) {
+    this.webContext = webContext;
+    this.affirmative = affirmative;
+  }
+
+  async spy(text) {
+    const content = await this.webContext._getContent();
+    const index = this.webContext.precedings.reduce((index, text) => {
+      const remainingContent = content.slice(index + 1);
+      const textOffset = remainingContent.findIndex(item => item.text != null && item.text.includes(text));
+      if (textOffset === -1) {
+        throw `Text not found on page: ${text}`;
+      }
+      return index + 1 + textOffset;
+    }, -1);
+    const remainingContent = content.slice(index + 1);
+    const textOffset = remainingContent.findIndex(item => item.text != null && item.text.includes(text));
+    if (this.affirmative) {
+      if (textOffset === -1) {
+        throw `Text not found on page: ${text}`;
+      }
+    } else {
+      if (textOffset !== -1) {
+        throw `Text found on page: ${text}`;
+      }
+    }
+  }
+
+  get not() {
+    return new WebCan(this.webContext, !this.affirmative);
   }
 }
 
