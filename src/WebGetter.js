@@ -56,7 +56,10 @@ class WebGetter extends WebAccessor {
    */
   async options() {
     let {content, index} = await this.webContext._getContentWithIndexOfContext([...this.webContext.precedings, this.key], this._timeout);
-    let gettable = content[index + 1];
+    let gettable;
+    do {
+      gettable = content[++index];
+    } while (gettable && gettable.tagName === "IMG");
     switch (gettable.tagName) {
       case "SELECT":
         return gettable.options.map(option => option.text);
@@ -65,11 +68,13 @@ class WebGetter extends WebAccessor {
           case "radio": {
             const options = [];
             while (true) {
-              const label = content[index + 1];
+              const label = content[++index];
               if (label && label.text) {
                 options.push(label.text);
               }
-              gettable = content[index += 2];
+              do {
+                gettable = content[++index];
+              } while (gettable && gettable.tagName === "IMG");
               if (gettable.tagName !== "INPUT" || gettable.type !== "radio") {
                 return options;
               }
