@@ -13,7 +13,7 @@ function getContent() {
   }
 
   function reduceWhitespace(string) {
-    return string.replace(/\s+/g, " ");
+    return string.replace(/[^\S\u2009]+/g, " ");
   }
 
   function textTransform(string, parentElement) {
