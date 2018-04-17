@@ -13,7 +13,7 @@ function getContent() {
   }
 
   function reduceWhitespace(string) {
-    return string.replace(/[^\S\u00a0]+/g, " ");
+    return string.replace(/\s+/g, " ");
   }
 
   function textTransform(string, parentElement) {
@@ -98,8 +98,8 @@ function getContent() {
                   break;
                 default:
                   if (customWidgetMatchers.some(function (matcher) {
-                      return matcher(node);
-                    })) {
+                    return matcher(node);
+                  })) {
                     block.push(node);
                     lastDescendant(treeWalker);
                   }
@@ -110,14 +110,14 @@ function getContent() {
               data = textTransform(data, node.parentNode);
               var lastBlockItem = block[block.length - 1];
               if (lastBlockItem && lastBlockItem.type === "string") {
-                if (data.trim()) {
+                if (data) {
                   lastBlockItem.substrings.push({
                     parentElement: node.parentNode,
-                    text: data.trim()
+                    text: data
                   });
                   lastBlockItem.text = reduceWhitespace(lastBlockItem.substrings.map(function (s) {
                     return s.text;
-                  }).join(" "));
+                  }).join(""));
                 }
               } else {
                 var blockItem = {
@@ -126,10 +126,10 @@ function getContent() {
                   text: data,
                   substrings: []
                 };
-                if (data.trim()) {
+                if (data) {
                   blockItem.substrings.push({
                     parentElement: node.parentNode,
-                    text: data.trim()
+                    text: data
                   });
                 }
                 block.push(blockItem);
