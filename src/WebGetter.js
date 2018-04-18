@@ -5,12 +5,17 @@ const WebAccessor = require('./WebAccessor');
  * @extends WebAccessor
  */
 class WebGetter extends WebAccessor {
+  async value() {
+    const {value} = await this.values("value");
+    return value;
+  }
+
   /**
    * Gets one or more items from the page and assigns them names in the order specified.
    * @param {...String} names - The property names to be used for the items returned.
    * @returns {Promise<{}>} An object containing properties with the specified names along with their values.
    */
-  async as(...names) {
+  async values(...names) {
     let {content, index} = await this.webContext._getContentWithIndexOfContext([...this.webContext.precedings, this.key], this._timeout);
     const result = {};
     for (const name of names) {
