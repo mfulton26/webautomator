@@ -16,7 +16,7 @@ function getContent() {
     return string.replace(/[^\S\u2009]+/g, " ");
   }
 
-  function textTransform(string, parentElement) {
+  function transformText(string, parentElement) {
     var computedStyle = window.getComputedStyle(parentElement);
     switch (computedStyle["text-transform"]) {
       case "capitalize":
@@ -31,6 +31,7 @@ function getContent() {
         return string.replace(/\w/g, function (match) {
           return match.toLowerCase();
         });
+      case "none":
       default:
         return string;
     }
@@ -107,7 +108,7 @@ function getContent() {
               break;
             case Node.TEXT_NODE:
               var data = reduceWhitespace(node.textContent);
-              data = textTransform(data, node.parentNode);
+              data = transformText(data, node.parentNode);
               var lastBlockItem = block[block.length - 1];
               if (lastBlockItem && lastBlockItem.type === "string") {
                 if (data) {

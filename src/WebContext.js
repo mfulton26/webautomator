@@ -10,11 +10,13 @@ class WebContext {
    * @param {IWebDriver} webDriver The underlying Selenium WebDriver instance.
    * @param {number} timeout The default implicit timeout in milliseconds.
    * @param {Array<String|RegExp>} precedings The preceding text in the form of strings and regular expressions.
+   * @param {Array<String|RegExp>} followings The following text in the form of strings and regular expressions.
    */
-  constructor(webDriver, timeout = 10000, precedings = []) {
+  constructor(webDriver, timeout = 10000, precedings = [], followings = []) {
     this.webDriver = webDriver;
     this.timeout = timeout;
     this.precedings = precedings;
+    this.followings = followings;
 
     this.can = new WebCan(this);
   }
@@ -23,38 +25,40 @@ class WebContext {
     return await this.webDriver.executeScript(getContent);
   }
 
-  async _getContentWithIndexOfContext(precedings, timeout) {
+  async _findContentItem(key, timeout, precedings, followings /*todo*/) {
     let caught = undefined;
     const condition = async () => {
       try {
         const content = await this._getContent();
-        return precedings.reduce(({index: fromIndex}, preceding) => {
+        const findings = [...precedings, key, ...followings].reduce((findings, something) => {
+          const fromIndex = findings.length ? findings[findings.length - 1].index : -1;
           const remainingContent = content.slice(fromIndex + 1);
           const predicate = (item, index) => {
-            const matcher = preceding instanceof RegExp ? String.prototype.match : String.prototype.includes;
-            if (item.text != null && matcher.call(item.text.replace(/\u00a0/, " "), preceding)) {
+            const matcher = something instanceof RegExp ? String.prototype.match : String.prototype.includes;
+            if (item.text != null && matcher.call(item.text.replace(/\u00a0/, " "), something)) {
               return true;
             }
             const nextItem = content[index + 1];
             if (nextItem) {
-              if (nextItem.placeholder != null && matcher.call(nextItem.placeholder, preceding)) {
+              if (nextItem.placeholder != null && matcher.call(nextItem.placeholder, something)) {
                 return true;
-              } else if (nextItem.title != null && matcher.call(nextItem.title, preceding)) {
+              } else if (nextItem.title != null && matcher.call(nextItem.title, something)) {
                 return true;
-              } else if (nextItem.value != null && matcher.call(nextItem.value, preceding)) {
+              } else if (nextItem.value != null && matcher.call(nextItem.value, something)) {
                 return true;
               }
             }
           };
           const precedingOffset = remainingContent.findIndex(predicate);
           if (precedingOffset === -1) {
-            throw `Not found on page: ${preceding}`;
+            throw `Not found on page: ${something}`;
           }
           const index = fromIndex + 1 + precedingOffset;
           const item = content[index];
           const substringIndex = item.type === "string" ? item.substrings.findIndex(predicate) : -1;
-          return {content, item, index, substringIndex};
-        }, {index: -1});
+          return [...findings, {content, item, index, substringIndex}];
+        }, []);
+        return findings[precedings.length];
       } catch (e) {
         if (typeof e === "string") {
           caught = e;
@@ -64,7 +68,24 @@ class WebContext {
         }
       }
     };
-    const message = caught || `Could not find on page: ${precedings.join(", ")}`;
+
+    function createDefaultMessage() {
+      if (precedings.length) {
+        if (followings.length) {
+          return `Could not find ${key} between ${precedings.join(", ")} and ${followings.join(", ")}`;
+        } else {
+          return `Could not find ${key} after ${precedings.join(", ")}`;
+        }
+      } else {
+        if (followings.length) {
+          return `Could not find ${key} before ${followings.join(", ")}`;
+        } else {
+          return `Could not find ${key}`;
+        }
+      }
+    }
+
+    const message = caught || createDefaultMessage();
     return await this.webDriver.wait(condition, timeout, message);
   }
 
@@ -72,16 +93,42 @@ class WebContext {
    * Wraps a block of Web Automator code with a new context pointing to elements that are preceded by some text.
    * @param {string} text - The preceding text.
    * @param {Function} callback - The block of code to wrap, receives a WebContext instance to use for the new context.
-   * @returns {Promise<WebContext>}
+   * @returns {WebContext|Promise<WebContext>}
    */
-  async after(text, callback = Function.prototype) {
-    const webContext = new WebContext(this.webDriver, this.timeout, this.precedings.concat(text));
-    await callback(webContext);
-    return webContext;
+  after(text, callback) {
+    const webContext = new WebContext(this.webDriver, this.timeout, [...this.precedings, text], this.followings);
+    if (callback) {
+      return (async () => callback(webContext))();
+    } else {
+      return webContext;
+    }
+  }
+
+  before(text, callback) {
+    const webContext = new WebContext(this.webDriver, this.timeout, this.precedings, [text, ...this.followings]);
+    if (callback) {
+      return (async () => callback(webContext))();
+    } else {
+      return webContext;
+    }
+  }
+
+  between(...precedings) {
+    return {
+      and: (...args) => {
+        const callback = typeof args[args.length - 1] === "function" ? args.splice(-1, 1) : undefined;
+        const webContext = new WebContext(this.webDriver, this.timeout, [...this.precedings, ...precedings], [...args, ...this.followings]);
+        if (callback) {
+          return (async () => callback(webContext))();
+        } else {
+          return webContext;
+        }
+      }
+    };
   }
 
   async getString(key, timeout = this.timeout) {
-    let {content, index, substringIndex} = await this._getContentWithIndexOfContext([...this.precedings, key], timeout);
+    let {content, index, substringIndex} = await this._findContentItem(key, timeout, this.precedings, this.followings);
     if (substringIndex !== -1) {
       const item = content[index];
       if (substringIndex + 1 < item.substrings.length) {
@@ -98,7 +145,7 @@ class WebContext {
   }
 
   async getValue(key, timeout = this.timeout) {
-    let {content, index} = await this._getContentWithIndexOfContext([...this.precedings, key], timeout);
+    let {content, index} = await this._findContentItem(key, timeout, this.precedings, this.followings);
     for (++index; index < content.length; index++) {
       const item = content[index];
       if (item.type !== "string") {
@@ -151,7 +198,7 @@ class WebContext {
   }
 
   async match(regExp, timeout = this.timeout) {
-    const {content, index} = await this._getContentWithIndexOfContext([...this.precedings, regExp], timeout);
+    const {content, index} = await this._findContentItem(regExp, timeout, this.precedings, this.followings);
     const item = content[index];
     return item.text.match(regExp);
   }
@@ -175,15 +222,8 @@ class WebCan {
     }, -1);
     const remainingContent = content.slice(index + 1);
     const textOffset = remainingContent.findIndex(item => item.text != null && item.text.includes(text));
-    if (this.affirmative) {
-      if (textOffset === -1) {
-        throw `Text not found on page: ${text}`;
-      }
-    } else {
-      if (textOffset !== -1) {
-        throw `Text found on page: ${text}`;
-      }
-    }
+    const spied = textOffset !== -1;
+    return spied === this.affirmative;
   }
 
   get not() {

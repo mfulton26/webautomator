@@ -16,10 +16,13 @@ class WebGetter extends WebAccessor {
    * @returns {Promise<{}>} An object containing properties with the specified names along with their values.
    */
   async values(...names) {
-    let {content, index} = await this.webContext._getContentWithIndexOfContext([...this.webContext.precedings, this.key], this._timeout);
+    let {content, index} = await this.webContext._findContentItem(this.key, this._timeout, this.webContext.precedings, this.webContext.followings);
     const result = {};
     for (const name of names) {
-      let gettable = content[++index];
+      let gettable;
+      do {
+        gettable = content[++index];
+      } while (gettable && gettable.tagName === "IMG");
       switch (gettable.tagName) {
         case "SELECT":
           const firstSelectedOption = gettable.options.find(option => option.isSelected);
@@ -30,7 +33,7 @@ class WebGetter extends WebAccessor {
             case "radio":
               while (true) {
                 const label = content[index + 1];
-                if (label && label.checked) {
+                if (label && gettable.checked) {
                   result[name] = label.text;
                   break;
                 } else {
@@ -60,7 +63,7 @@ class WebGetter extends WebAccessor {
    * @returns {Promise<Array>} The displayed text for the available options.
    */
   async options() {
-    let {content, index} = await this.webContext._getContentWithIndexOfContext([...this.webContext.precedings, this.key], this._timeout);
+    let {content, index} = await this.webContext._findContentItem(this.key, this._timeout, this.webContext.precedings, this.webContext.followings);
     let gettable;
     do {
       gettable = content[++index];

@@ -15,9 +15,19 @@ class WebSetter extends WebAccessor {
       values = values[0];
     }
     let caught = undefined;
+
+    async function setTextValue(settable, value) {
+      if (settable.value !== value) {
+        await settable.element.clear();
+        if (value) {
+          await settable.element.sendKeys(value);
+        }
+      }
+    }
+
     const condition = async () => {
       try {
-        let {content, index} = await this.webContext._getContentWithIndexOfContext([...this.webContext.precedings, this.key], this._timeout);
+        let {content, index} = await this.webContext._findContentItem(this.key, this._timeout, this.webContext.precedings, this.webContext.followings);
         for (const value of values) {
           const settableOffset = content.slice(index + 1).findIndex(item => WebContentItems.isSettable(item));
           if (settableOffset === -1) {
@@ -55,12 +65,13 @@ class WebSetter extends WebAccessor {
                   }
                   break;
                 default:
-                  await settable.element.sendKeys(value);
+                  await setTextValue(settable, value);
                   break;
               }
               break;
+            case "TEXTAREA":
             default:
-              await settable.element.sendKeys(value);
+              await setTextValue(settable, value);
               break;
           }
         }
