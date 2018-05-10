@@ -25,6 +25,74 @@ class WebContext {
     return await this.webDriver.executeScript(getContent);
   }
 
+  /**
+   * @returns {Promise<Object>} An a11y-like tree representing the content of the page. May be used in snapshot testing.
+   */
+  async getContent() {
+    const content = await this._getContent();
+    return content.map(function (item) {
+      switch (item.type) {
+        case "string":
+          return item.text;
+        default:
+          switch (item.tagName) {
+            case "IMG":
+              return {
+                type: "img",
+                props: {
+                  src: item.src
+                }
+              };
+            case "INPUT":
+              switch (item.type) {
+                case "checkbox":
+                case "radio":
+                  return {
+                    type: item.type,
+                    props: {
+                      checked: item.checked
+                    }
+                  };
+                default:
+                  return {
+                    type: "textbox",
+                    props: {
+                      placeholder: item.placeholder,
+                      value: item.value,
+                      children: item.text
+                    }
+                  };
+              }
+            case "SELECT":
+              return {
+                type: "combobox",
+                props: {
+                  children: item.options.map(option => ({
+                    type: "option",
+                    props: {
+                      selected: option.isSelected,
+                      children: option.text
+                    }
+                  }))
+                }
+              };
+            case "TEXTAREA":
+              return {
+                type:"textbox",
+                props: {
+                  multiline: true,
+                  children: item.value
+                }
+              };
+            default:
+              return {
+                type: "unknown"
+              };
+          }
+      }
+    });
+  }
+
   async _findContentItem(key, timeout, precedings, followings /*todo*/) {
     let caught = undefined;
     const condition = async () => {

@@ -208,7 +208,9 @@ function getContent() {
         case "INPUT":
           data.type = blockItem.type;
           data.checked = blockItem.checked;
-          data.placeholder = blockItem.placeholder;
+          if (blockItem.placeholder) {
+            data.placeholder = blockItem.placeholder;
+          }
           data.value = blockItem.value;
           switch (blockItem.type) {
             case "submit":
@@ -236,6 +238,12 @@ function getContent() {
               text: option.innerText
             });
           }
+          break;
+        case "TEXTAREA":
+          if (blockItem.placeholder) {
+            data.placeholder = blockItem.placeholder;
+          }
+          data.value = blockItem.value;
           break;
         default:
           customWidgetAdapters.forEach(function (adapter) {
