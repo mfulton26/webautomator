@@ -1,6 +1,7 @@
 const {getContent} = require('./remote/content');
 const WebGetter = require('./WebGetter');
 const WebSetter = require('./WebSetter');
+const {JSDOM} = require('jsdom');
 
 /**
  * Tracks expected context to find and interact with elements on a page.
@@ -26,71 +27,82 @@ class WebContext {
   }
 
   /**
-   * @returns {Promise<Object>} An a11y-like tree representing the content of the page. May be used in snapshot testing.
+   * @returns {Promise<Element>} An a11y-like tree representing the content of the page. May be used in snapshot testing.
    */
   async getContent() {
     const content = await this._getContent();
-    return content.map(function (item) {
+    const aom = new JSDOM("<window></window>", {contentType: "application/xml"});
+    const {window: {document}} = aom;
+    const windowElement = document.documentElement;
+    for (const item of content) {
       switch (item.type) {
-        case "string":
-          return item.text;
+        case "string": {
+          windowElement.appendChild(document.createTextNode(item.text));
+          break;
+        }
         default:
           switch (item.tagName) {
-            case "IMG":
-              return {
-                type: "img",
-                props: {
-                  src: item.src
-                }
-              };
-            case "INPUT":
+            case "IMG": {
+              const e = document.createElement("img");
+              e.setAttribute("src", item.src);
+              windowElement.appendChild(e);
+              break;
+            }
+            case "INPUT": {
               switch (item.type) {
                 case "checkbox":
-                case "radio":
-                  return {
-                    type: item.type,
-                    props: {
-                      checked: item.checked
-                    }
-                  };
-                default:
-                  return {
-                    type: "textbox",
-                    props: {
-                      placeholder: item.placeholder,
-                      value: item.value,
-                      children: item.text
-                    }
-                  };
+                case "radio": {
+                  const e = document.createElement(item.type);
+                  if (item.checked) {
+                    e.setAttribute("checked", true);
+                  }
+                  windowElement.appendChild(e);
+                  break;
+                }
+                default: {
+                  const e = document.createElement("textbox");
+                  if (item.placeholder) {
+                    e.setAttribute("placeholder", item.placeholder);
+                  }
+                  e.setAttribute("value", item.value);
+                  windowElement.appendChild(e);
+                  break;
+                }
               }
-            case "SELECT":
-              return {
-                type: "combobox",
-                props: {
-                  children: item.options.map(option => ({
-                    type: "option",
-                    props: {
-                      selected: option.isSelected,
-                      children: option.text
-                    }
-                  }))
+              break;
+            }
+            case "SELECT": {
+              const e = document.createElement("combobox");
+              for (const option of item.options) {
+                const o = document.createElement("option");
+                if (option.isSelected) {
+                  o.setAttribute("selected", true);
                 }
-              };
-            case "TEXTAREA":
-              return {
-                type:"textbox",
-                props: {
-                  multiline: true,
-                  children: item.value
-                }
-              };
-            default:
-              return {
-                type: "unknown"
-              };
+                o.textContent = option.text;
+                e.appendChild(o);
+              }
+              windowElement.appendChild(e);
+              break;
+            }
+            case "TEXTAREA": {
+              const e = document.createElement("textbox");
+              e.setAttribute("multiline", true);
+              if (item.placeholder) {
+                e.setAttribute("placeholder", item.placeholder);
+              }
+              e.textContent = item.value;
+              windowElement.appendChild(e);
+              break;
+            }
+            default: {
+              const e = document.createElement("unknown");
+              windowElement.appendChild(e);
+              break;
+            }
           }
       }
-    });
+    }
+    return windowElement;
   }
 
   async _findContentItem(key, timeout, precedings, followings /*todo*/) {
