@@ -18,11 +18,14 @@ class WebSetter extends WebAccessor {
     let caught = undefined;
 
     async function setTextValue(settable, value) {
-      if (settable.value !== value) {
+      if (settable.value === value) {
+        return;
+      }
+      if (settable.value) {
         await settable.element.clear();
-        if (value) {
-          await settable.element.sendKeys(value);
-        }
+      }
+      if (value) {
+        await settable.element.sendKeys(value);
       }
     }
 

@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Demo 1`] = `
+<window>
+  Parent Information
+  First Name:
+  <textbox
+    value="Joyce"
+  />
+  Last Name:
+  <textbox
+    value="Byers"
+  />
+  Gender:
+  <combobox>
+    <option>
+      Male
+    </option>
+    <option
+      selected="true"
+    >
+      Female
+    </option>
+  </combobox>
+  Child Information
+  First Name:
+  <textbox
+    value="Will"
+  />
+  Last Name:
+  <textbox
+    value="Byers"
+  />
+  Gender:
+  <combobox>
+    <option
+      selected="true"
+    >
+      Male
+    </option>
+    <option>
+      Female
+    </option>
+  </combobox>
+  Date of Birth:
+  <textbox
+    value="1971-03-22"
+  />
+  Shipping Information
+  <radio />
+  Ground
+  <radio
+    checked="true"
+  />
+  2-Day
+  <radio />
+  1-Day
+  Shipping Options
+  <checkbox />
+  Gift wrapped?
+  <checkbox />
+  Warranty?
+  <checkbox
+    checked="true"
+  />
+  Returnable?
+  Confirmation
+  <checkbox
+    checked="true"
+  />
+  I confirm that these details are accurate.
+</window>
+`;

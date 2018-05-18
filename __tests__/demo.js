@@ -21,4 +21,6 @@ test('Demo', async function () {
   await automator.set('Shipping Information').to('2-Day');
 
   await automator.click('I confirm that these details are accurate.');
+
+  expect(await automator.getContent()).toMatchSnapshot();
 });

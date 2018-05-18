@@ -1,3 +1,3 @@
-const WebAutomator = require('./src/WebAutomator');
+const {WebAutomator} = require('./src/WebAutomator');
 
-exports.WebAutomator = WebAutomator;
+module.exports = {WebAutomator};

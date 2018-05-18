@@ -16,4 +16,4 @@ class WebAutomator extends WebContext {
   }
 }
 
-module.exports = WebAutomator;
+module.exports = {WebAutomator};
