@@ -1,7 +1,7 @@
 const {getContent} = require('./remote/content');
 const WebGetter = require('./WebGetter');
 const WebSetter = require('./WebSetter');
-const {JSDOM} = require('jsdom');
+const {toWindowElement} = require('./utils');
 
 /**
  * Tracks expected context to find and interact with elements on a page.
@@ -10,12 +10,14 @@ class WebContext {
   /**
    * @param {IWebDriver} webDriver The underlying Selenium WebDriver instance.
    * @param {number} timeout The default implicit timeout in milliseconds.
+   * @param {EventEmitter} eventEmitter The WebAutomator's event emitter.
    * @param {Array<String|RegExp>} precedings The preceding text in the form of strings and regular expressions.
    * @param {Array<String|RegExp>} followings The following text in the form of strings and regular expressions.
    */
-  constructor(webDriver, timeout = 10000, precedings = [], followings = []) {
+  constructor(webDriver, timeout = 10000, eventEmitter, precedings = [], followings = []) {
     this.webDriver = webDriver;
     this.timeout = timeout;
+    this.eventEmitter = eventEmitter;
     this.precedings = precedings;
     this.followings = followings;
 
@@ -31,78 +33,7 @@ class WebContext {
    */
   async getContent() {
     const content = await this._getContent();
-    const aom = new JSDOM("<window></window>", {contentType: "application/xml"});
-    const {window: {document}} = aom;
-    const windowElement = document.documentElement;
-    for (const item of content) {
-      switch (item.type) {
-        case "string": {
-          windowElement.appendChild(document.createTextNode(item.text));
-          break;
-        }
-        default:
-          switch (item.tagName) {
-            case "IMG": {
-              const e = document.createElement("img");
-              e.setAttribute("src", item.src);
-              windowElement.appendChild(e);
-              break;
-            }
-            case "INPUT": {
-              switch (item.type) {
-                case "checkbox":
-                case "radio": {
-                  const e = document.createElement(item.type);
-                  if (item.checked) {
-                    e.setAttribute("checked", true);
-                  }
-                  windowElement.appendChild(e);
-                  break;
-                }
-                default: {
-                  const e = document.createElement("textbox");
-                  if (item.placeholder) {
-                    e.setAttribute("placeholder", item.placeholder);
-                  }
-                  e.setAttribute("value", item.value);
-                  windowElement.appendChild(e);
-                  break;
-                }
-              }
-              break;
-            }
-            case "SELECT": {
-              const e = document.createElement("combobox");
-              for (const option of item.options) {
-                const o = document.createElement("option");
-                if (option.isSelected) {
-                  o.setAttribute("selected", true);
-                }
-                o.textContent = option.text;
-                e.appendChild(o);
-              }
-              windowElement.appendChild(e);
-              break;
-            }
-            case "TEXTAREA": {
-              const e = document.createElement("textbox");
-              e.setAttribute("multiline", true);
-              if (item.placeholder) {
-                e.setAttribute("placeholder", item.placeholder);
-              }
-              e.textContent = item.value;
-              windowElement.appendChild(e);
-              break;
-            }
-            default: {
-              const e = document.createElement("unknown");
-              windowElement.appendChild(e);
-              break;
-            }
-          }
-      }
-    }
-    return windowElement;
+    return toWindowElement(content);
   }
 
   async _findContentItem(key, timeout, precedings, followings /*todo*/) {
@@ -176,7 +107,7 @@ class WebContext {
    * @returns {WebContext|Promise<WebContext>}
    */
   after(text, callback) {
-    const webContext = new WebContext(this.webDriver, this.timeout, [...this.precedings, text], this.followings);
+    const webContext = new WebContext(this.webDriver, this.timeout, this.eventEmitter, [...this.precedings, text], this.followings);
     if (callback) {
       return (async () => callback(webContext))();
     } else {
@@ -185,7 +116,7 @@ class WebContext {
   }
 
   before(text, callback) {
-    const webContext = new WebContext(this.webDriver, this.timeout, this.precedings, [text, ...this.followings]);
+    const webContext = new WebContext(this.webDriver, this.timeout, this.eventEmitter, this.precedings, [text, ...this.followings]);
     if (callback) {
       return (async () => callback(webContext))();
     } else {
@@ -197,7 +128,7 @@ class WebContext {
     return {
       and: (...args) => {
         const callback = typeof args[args.length - 1] === "function" ? args.splice(-1, 1) : undefined;
-        const webContext = new WebContext(this.webDriver, this.timeout, [...this.precedings, ...precedings], [...args, ...this.followings]);
+        const webContext = new WebContext(this.webDriver, this.timeout, this.eventEmitter, [...this.precedings, ...precedings], [...args, ...this.followings]);
         if (callback) {
           return (async () => callback(webContext))();
         } else {
@@ -269,6 +200,10 @@ class WebContext {
     }, -1);
     const clickable = content[index];
     const subClickable = clickable.substrings && clickable.substrings.find(substring => substring.text.includes(key));
+    this.eventEmitter.emit("action", {
+      action: "click",
+      content: toWindowElement(content)
+    });
     if (subClickable) {
       await subClickable.parentElement.click();
     } else {

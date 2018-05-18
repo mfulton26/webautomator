@@ -1,4 +1,5 @@
 const WebAccessor = require('./WebAccessor');
+const {toWindowElement} = require('./utils');
 
 /**
  * Fluent API for setting something identified by a key (e.g. label text).
@@ -45,6 +46,10 @@ class WebSetter extends WebAccessor {
               if (option.isSelected) {
                 break;
               } else {
+                this.webContext.eventEmitter.emit("action", {
+                  action: "set",
+                  content: toWindowElement(content)
+                });
                 await option.element.click();
               }
               break;
@@ -54,6 +59,10 @@ class WebSetter extends WebAccessor {
                   while (true) {
                     const label = content[index + 1];
                     if (label && label.text === value) {
+                      this.webContext.eventEmitter.emit("action", {
+                        action: "set",
+                        content: toWindowElement(content)
+                      });
                       await label.parentElement.click();
                       break;
                     } else {
@@ -65,12 +74,20 @@ class WebSetter extends WebAccessor {
                   }
                   break;
                 default:
+                  this.webContext.eventEmitter.emit("action", {
+                    action: "set",
+                    content: toWindowElement(content)
+                  });
                   await setTextValue(settable, value);
                   break;
               }
               break;
             case "TEXTAREA":
             default:
+              this.webContext.eventEmitter.emit("action", {
+                action: "set",
+                content: toWindowElement(content)
+              });
               await setTextValue(settable, value);
               break;
           }
