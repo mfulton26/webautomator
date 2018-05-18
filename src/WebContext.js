@@ -101,7 +101,7 @@ class WebContext {
   }
 
   /**
-   * Wraps a block of Web Automator code with a new context pointing to elements that are preceded by some text.
+   * Wraps a block of webautomator code with a new context pointing to elements that are preceded by some text.
    * @param {string} text - The preceding text.
    * @param {Function} callback - The block of code to wrap, receives a WebContext instance to use for the new context.
    * @returns {WebContext|Promise<WebContext>}

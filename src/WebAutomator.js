@@ -1,10 +1,6 @@
 const WebContext = require('./WebContext');
 const EventEmitter = require('events');
 
-/**
- * Entry point into the Web Automator API.
- * @extends WebContext
- */
 class WebAutomator extends WebContext {
   /**
    * @param {IWebDriver} webDriver The underlying Selenium WebDriver instance.

@@ -1,9 +1,9 @@
-# Web Automator
+# webautomator
 Web automation using rendered web context
 
 ## Installation
 
-Web Automator may be installed via npm with
+`webautomator` may be installed via npm with
 
     npm install webautomator
 
