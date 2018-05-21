@@ -67,6 +67,9 @@ class WebSetter extends WebAccessor {
                         content: toWindowElement(content)
                       });
                       await label.parentElement.click();
+                      do {
+                        settable = content[index += 2];
+                      } while (settable.type === "radio");
                       break;
                     } else {
                       settable = content[index += 2];
