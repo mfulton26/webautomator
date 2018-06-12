@@ -1,4 +1,4 @@
-const {getContent} = require('./remote/content');
+const {getContentBundle} = require('./remote/content');
 const WebGetter = require('./WebGetter');
 const WebSetter = require('./WebSetter');
 const {toWindowElement} = require('./utils');
@@ -25,7 +25,28 @@ class WebContext {
   }
 
   async _getContent() {
-    return await this.webDriver.executeScript(getContent);
+    const [content, ...elements] = await this.webDriver.executeScript(getContentBundle);
+    for (const item of content) {
+      switch (item.type) {
+        case "string":
+          item.parentElement = elements[item.parentElementReference];
+          delete item.parentElementReference;
+          for (const substring of item.substrings) {
+            substring.parentElement = elements[substring.parentElementReference];
+            delete substring.parentElementReference;
+          }
+          break;
+        default:
+          item.element = elements[item.elementReference];
+          delete item.elementReference;
+          if (item.options) for (const option of item.options) {
+            option.element = elements[option.elementReference];
+            delete option.elementReference;
+          }
+          break;
+      }
+    }
+    return content;
   }
 
   /**
