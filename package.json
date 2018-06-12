@@ -1,6 +1,6 @@
 {
   "name": "webautomator",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Web automation using rendered web context",
   "license": "Apache-2.0",
   "keywords": [
