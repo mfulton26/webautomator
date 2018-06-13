@@ -288,7 +288,7 @@ function getContentBundle() {
         break;
     }
   });
-  return [content, ...elements];
+  return [content].concat(elements);
 }
 
 module.exports = {getContentBundle};
