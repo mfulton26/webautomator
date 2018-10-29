@@ -205,6 +205,7 @@ function getContentBundle() {
         switch (blockItem.tagName) {
           case "IMG":
             data.src = blockItem.src;
+            data.text = blockItem.className;
             break;
           case "INPUT":
             data.type = blockItem.type;
