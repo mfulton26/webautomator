@@ -1,6 +1,8 @@
 # webautomator
 Web automation using rendered web context
 
+⚠️ This tool is not under active development nor is it being maintained. ⚠️
+
 ## Installation
 
 `webautomator` may be installed via npm with
